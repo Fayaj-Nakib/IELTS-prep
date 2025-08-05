@@ -1,0 +1,32 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow authenticated users to read and write their own user data
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      
+      // Allow users to read and write their own tasks
+      match /tasks/{taskId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+    
+    // Allow authenticated users to read and write leaderboard data
+    match /leaderboard/{userId} {
+      allow read, write: if request.auth != null;
+    }
+
+    // Allow admin to read/write and members to read the current exam info
+    match /exams/{examId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == "nLcWDF6a00RloHQFHmC2m6SEiCi1";
+      
+      // Allow all authenticated users to read all exam results (for leaderboard)
+      // Allow users to write their own results
+      match /results/{userId} {
+        allow read: if request.auth != null;
+        allow write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+  }
+}
